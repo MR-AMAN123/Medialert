@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Reminder App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 200vh;
+            
+            padding: 20px;
+          background-image:url(medd.jpeg) ;
+          background-size: cover;  
+        }
+        .nav {
+             
+             display: flex;
+             justify-content:space-around;
+             padding: 10px 0;
+             position: relative;
+             width: 100%;
+             top: -4vh;
+             z-index: 10;
+            }
+        .navbar{
+             width: 90%;
+             display: flex;
+             align-items: center;
+             display: flex;
+             justify-content: space-around;
+             margin-left: 30vh;
+             }
+
+        .container {
+            background-color: white;
+            width: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 10vh;
+            margin-left: 50vh;
+           
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin-left: 10px;
+            color: #333;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-section input, 
+        .input-section select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: #3B82F6;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-edit {
+            background-color: transparent;
+            color: #3B82F6;
+        }
+
+        .btn-delete {
+            background-color: transparent;
+            color: #EF4444;
+        }
+
+        .medicine-list {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .medicine-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .medicine-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <h1>Medi<span style="color: rgb(6, 134, 134);">Alert</span></h1>
+        <div class="navbar">
+        <div id="Home" ><h3 style="cursor: pointer;">Home</h3></div>
+        <div id="About"><h3 style="cursor: pointer;">About</h3></div>
+        <div id="Contact Us"><h3 style="cursor: pointer;">Contact-Us</h3></div>
+        <div id="About"><h3 style="cursor: pointer;">Medicine</h3></div>
+        <button style="height: 5vh;border: #17e0e7;cursor: pointer;border-radius: 0.1rem;
+        margin-top: -2vh;border-radius: 0.5em;">
+          <a href="index.html" <div id="About "><h2 style="margin-top: 0.8vh;">Log Out</h2></div></button>   </a>  
+    </div>   
+    </div>
+    <div class="container">
+        
+        <div class="header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 8H2v8h4v-8z"/>
+                <path d="M22 8h-4v8h4V8z"/>
+                <path d="M14 16v-4h-4v4h4z"/>
+                <path d="M2 10h20"/>
+            </svg>
+            <h1>Medicine Reminder</h1>
+        </div>
+
+        <div class="input-section">
+            <input type="text" id="medicineName" placeholder="Medicine Name">
+            <input type="text" id="medicineDosage" placeholder="Dosage (e.g., 1 tablet)">
+            <div class="input-row">
+                <input type="time" id="medicineTime" style="flex-grow: 1;">
+                <select id="medicineFrequency" style="flex-grow: 1;">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <button id="addMedicineBtn" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Medicine
+            </button>
+        </div>
+
+        <div class="medicine-list" id="medicineList">
+            <h2>My Medicines-</h2>
+            <div id="emptyState" class="empty-state">
+                No medicines added yet
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        class MedicineReminderApp {
+            constructor() {
+                this.medicines = [];
+                this.editingMedicineId = null;
+
+                this.medicineName = document.getElementById('medicineName');
+                this.medicineDosage = document.getElementById('medicineDosage');
+                this.medicineTime = document.getElementById('medicineTime');
+                this.medicineFrequency = document.getElementById('medicineFrequency');
+                this.addMedicineBtn = document.getElementById('addMedicineBtn');
+                this.medicineList = document.getElementById('medicineList');
+                this.emptyState = document.getElementById('emptyState');
+
+                this.setupEventListeners();
+                this.requestNotificationPermission();
+            }
+
+            setupEventListeners() {
+                this.addMedicineBtn.addEventListener('click', () => {
+                    this.editingMedicineId ? this.updateMedicine() : this.addMedicine();
+                });
+            }
+
+            requestNotificationPermission() {
+                if ('Notification' in window) {
+                    Notification.requestPermission();
+                }
+            }
+
+            addMedicine() {
+                const medicine = {
+                    id: Date.now(),
+                    name: this.medicineName.value,
+                    dosage: this.medicineDosage.value,
+                    time: this.medicineTime.value,
+                    frequency: this.medicineFrequency.value
+                };
+
+                if (!medicine.name || !medicine.time) {
+                    alert('Please enter medicine name and time');
+                    return;
+                }
+
+                this.medicines.push(medicine);
+                this.setupReminder(medicine);
+                this.renderMedicineList();
+                this.clearInputs();
+            }
+
+            setupReminder(medicine) {
+                const [hours, minutes] = medicine.time.split(':');
+                const reminderTime = new Date();
+                reminderTime.setHours(parseInt(hours), parseInt(minutes), 0);
+
+                const dailyReminder = setInterval(() => {
+                    const now = new Date();
+                    if (now.getHours() === reminderTime.getHours() && 
+                        now.getMinutes() === reminderTime.getMinutes()) {
+                        this.createNotification(medicine);
+                    }
+                }, 60000);
+
+                medicine.reminder = dailyReminder;
+            }
+
+            createNotification(medicine) {
+                if (Notification.permission === 'granted') {
+                    new Notification(`Time to take your ${medicine.name}`, {
+                        body: `Dosage: ${medicine.dosage}`
+                    });
+                }
+            }
+
+            renderMedicineList() {
+                const listContainer = document.createElement('div');
+                this.medicines.forEach(medicine => {
+                    const medicineItem = document.createElement('div');
+                    medicineItem.className = 'medicine-item';
+                    medicineItem.innerHTML = `
+                        <div>
+                            <strong>${medicine.name}</strong>
+                            <p>${medicine.dosage} at ${medicine.time}</p>
+                        </div>
+                        <div class="medicine-item-actions">
+                            <button class="btn btn-edit" onclick="app.editMedicine(${medicine.id})">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </button>
+                            <button class="btn btn-delete" onclick="app.removeMedicine(${medicine.id})">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    listContainer.appendChild(medicineItem);
+                });
+
+                const existingList = this.medicineList.querySelector('.medicine-item');
+                if (existingList) {
+                    this.medicineList.removeChild(existingList.parentNode);
+                }
+
+                this.medicineList.appendChild(listContainer);
+                this.emptyState.style.display = this.medicines.length ? 'none' : 'block';
+            }
+
+            editMedicine(id) {
+                const medicine = this.medicines.find(m => m.id === id);
+                if (medicine) {
+                    this.editingMedicineId = id;
+                    this.medicineName.value = medicine.name;
+                    this.medicineDosage.value = medicine.dosage;
+                    this.medicineTime.value = medicine.time;
+                    this.medicineFrequency.value = medicine.frequency;
+                    this.addMedicineBtn.textContent = 'Update Medicine';
+                }
+            }
+
+            updateMedicine() {
+                const index = this.medicines.findIndex(m => m.id === this.editingMedicineId);
+                if (index !== -1) {
+            
+                    clearInterval(this.medicines[index].reminder);
+
+                    
+                    this.medicines[index] = {
+                        ...this.medicines[index],
+                        name: this.medicineName.value,
+                        dosage: this.medicineDosage.value,
+                        time: this.medicineTime.value,
+                        frequency: this.medicineFrequency.value
+                    };
+
+                
+                    this.setupReminder(this.medicines[index]);
+
+                    this.renderMedicineList();
+                    this.clearInputs();
+                    this.editingMedicineId = null;
+                    this.addMedicineBtn.textContent = 'Add Medicine';
+                }
+            }
+
+            removeMedicine(id) {
+                const index = this.medicines.findIndex(m => m.id === id);
+                if (index !== -1) {
+            
+                    clearInterval(this.medicines[index].reminder);
+                    
+        
+                    this.medicines.splice(index, 1);
+                    this.renderMedicineList();
+                }
+            }
+
+            clearInputs() {
+                this.medicineName.value = '';
+                this.medicineDosage.value = '';
+                this.medicineTime.value = '';
+                this.medicineFrequency.value = 'daily';
+            }
+        }
+
+
+        const app = new MedicineReminderApp();
+        
+    </script>
+</body>
+</html>
